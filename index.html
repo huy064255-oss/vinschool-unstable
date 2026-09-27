@@ -1,0 +1,692 @@
+<!DOCTYPE html>
+<html lang="en" class="scroll-smooth">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Vinschool Unstable SMP | Minecraft Survival Server</title>
+    
+    <!-- Google Fonts: Silkscreen & Inter -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&family=Silkscreen:wght@400;700&display=swap" rel="stylesheet">
+    
+    <!-- FontAwesome Icons -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    
+    <!-- Tailwind CSS CDN -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    colors: {
+                        obsidian: {
+                            950: '#06040A',
+                            900: '#0D0914',
+                            800: '#151022',
+                            700: '#221B33',
+                        },
+                        emeraldGlow: {
+                            400: '#34D399',
+                            500: '#10B981',
+                            600: '#059669',
+                        },
+                        enderPurple: {
+                            400: '#C084FC',
+                            500: '#A855F7',
+                            600: '#9333EA',
+                        },
+                        cyanSilver: {
+                            300: '#E0F2FE',
+                            400: '#7DD3FC',
+                            500: '#38BDF8',
+                        }
+                    },
+                    fontFamily: {
+                        pixel: ['Silkscreen', 'cursive', 'sans-serif'],
+                        sans: ['Inter', 'sans-serif'],
+                    },
+                    boxShadow: {
+                        'glow-emerald': '0 0 25px -5px rgba(16, 185, 129, 0.4)',
+                        'glow-purple': '0 0 25px -5px rgba(168, 85, 247, 0.4)',
+                        'glow-cyan': '0 0 25px -5px rgba(56, 189, 248, 0.4)',
+                        'glow-intense': '0 0 40px 2px rgba(16, 185, 129, 0.25), 0 0 40px 2px rgba(168, 85, 247, 0.25)',
+                    }
+                }
+            }
+        }
+    </script>
+
+    <style>
+        /* Custom Scrollbar */
+        ::-webkit-scrollbar {
+            width: 10px;
+        }
+        ::-webkit-scrollbar-track {
+            background: #06040A;
+        }
+        ::-webkit-scrollbar-thumb {
+            background: #221B33;
+            border-radius: 5px;
+            border: 2px solid #06040A;
+        }
+        ::-webkit-scrollbar-thumb:hover {
+            background: #10B981;
+        }
+
+        /* Glassmorphism Classes */
+        .glass-panel {
+            background: rgba(13, 9, 20, 0.75);
+            backdrop-filter: blur(16px);
+            -webkit-backdrop-filter: blur(16px);
+            border: 1px solid rgba(255, 255, 255, 0.08);
+        }
+        .glass-card {
+            background: rgba(21, 16, 34, 0.6);
+            backdrop-filter: blur(12px);
+            -webkit-backdrop-filter: blur(12px);
+            border: 1px solid rgba(255, 255, 255, 0.06);
+            transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+        }
+        .glass-card:hover {
+            border-color: rgba(16, 185, 129, 0.4);
+            transform: translateY(-4px);
+            box-shadow: 0 12px 30px -10px rgba(16, 185, 129, 0.2);
+        }
+
+        /* Ambient Canvas styling */
+        #bg-canvas {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            pointer-events: none;
+            z-index: 0;
+        }
+
+        /* Pixel Text Glow FX */
+        .text-glow-emerald {
+            text-shadow: 0 0 12px rgba(16, 185, 129, 0.6);
+        }
+        .text-glow-purple {
+            text-shadow: 0 0 12px rgba(168, 85, 247, 0.6);
+        }
+
+        /* Pulse Animations */
+        @keyframes pulse-slow {
+            0%, 100% { opacity: 0.2; transform: scale(1); }
+            50% { opacity: 0.4; transform: scale(1.05); }
+        }
+        .animate-pulse-slow {
+            animation: pulse-slow 6s infinite ease-in-out;
+        }
+    </style>
+</head>
+<body class="bg-obsidian-950 text-slate-100 font-sans antialiased selection:bg-emeraldGlow-500 selection:text-obsidian-950 min-h-screen relative overflow-x-hidden">
+
+    <!-- Background Canvas for Floating Particles -->
+    <canvas id="bg-canvas"></canvas>
+
+    <!-- Background Ambient Glow Orbs -->
+    <div class="fixed top-[-10%] left-[-10%] w-[500px] h-[500px] bg-emeraldGlow-500/10 rounded-full blur-[120px] pointer-events-none z-0 animate-pulse-slow"></div>
+    <div class="fixed bottom-[-10%] right-[-10%] w-[600px] h-[600px] bg-enderPurple-500/10 rounded-full blur-[140px] pointer-events-none z-0 animate-pulse-slow"></div>
+
+    <!-- Sticky Navigation Bar -->
+    <header class="sticky top-0 z-50 glass-panel border-b border-white/10">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+            <div class="flex items-center justify-between h-20">
+                <!-- Logo Brand -->
+                <a href="#" class="flex items-center gap-3 group">
+                    <img src="assets/brand.png" alt="Vinschool Unstable SMP Logo" class="w-10 h-10 object-contain drop-shadow-[0_0_8px_rgba(16,185,129,0.5)] transition-transform group-hover:scale-110">
+                    <div>
+                        <span class="font-pixel text-sm sm:text-base text-white tracking-wider block">VINSCHOOL</span>
+                        <span class="font-pixel text-xs text-emeraldGlow-400 tracking-widest block">UNSTABLE SMP</span>
+                    </div>
+                </a>
+
+                <!-- Desktop Navigation Links -->
+                <nav class="hidden md:flex items-center gap-8 text-sm font-medium text-slate-300">
+                    <a href="#about" class="hover:text-emeraldGlow-400 transition-colors">About</a>
+                    <a href="#status" class="hover:text-emeraldGlow-400 transition-colors flex items-center gap-2">
+                        Status
+                        <span class="relative flex h-2 w-2">
+                            <span id="nav-status-ping" class="animate-ping absolute inline-flex h-full w-full rounded-full bg-emerald-400 opacity-75"></span>
+                            <span id="nav-status-dot" class="relative inline-flex rounded-full h-2 w-2 bg-emerald-500"></span>
+                        </span>
+                    </a>
+                    <a href="#how-to-join" class="hover:text-emeraldGlow-400 transition-colors">How to Join</a>
+                    <a href="#rules" class="hover:text-emeraldGlow-400 transition-colors">Rules</a>
+                </nav>
+
+                <!-- Quick Copy Button Header & Mobile Hamburger -->
+                <div class="flex items-center gap-3">
+                    <button onclick="copyToClipboard('unstable.vinschool-smp.me')" 
+                            class="hidden sm:flex items-center gap-2 bg-obsidian-800/80 hover:bg-emeraldGlow-500/20 text-emeraldGlow-400 border border-emeraldGlow-500/30 hover:border-emeraldGlow-400 px-4 py-2 rounded-xl text-xs font-pixel transition-all hover:shadow-glow-emerald active:scale-95">
+                        <i class="fa-solid fa-copy text-xs"></i>
+                        <span>Copy IP</span>
+                    </button>
+
+                    <button id="mobile-menu-btn" onclick="toggleMobileMenu()" aria-label="Toggle Mobile Menu"
+                            class="md:hidden text-slate-300 hover:text-white p-2 rounded-lg bg-obsidian-800/60 border border-white/10">
+                        <i class="fa-solid fa-bars text-lg" id="menu-icon"></i>
+                    </button>
+                </div>
+            </div>
+        </div>
+
+        <!-- Mobile Drawer Menu -->
+        <div id="mobile-menu" class="hidden md:hidden glass-panel border-t border-white/10 px-4 pt-3 pb-6 space-y-3">
+            <a href="#about" onclick="toggleMobileMenu()" class="block py-2 text-slate-300 hover:text-emeraldGlow-400 font-medium">About</a>
+            <a href="#status" onclick="toggleMobileMenu()" class="block py-2 text-slate-300 hover:text-emeraldGlow-400 font-medium">Server informations</a>
+            <a href="#features" onclick="toggleMobileMenu()" class="block py-2 text-slate-300 hover:text-emeraldGlow-400 font-medium">Features</a>
+            <a href="#how-to-join" onclick="toggleMobileMenu()" class="block py-2 text-slate-300 hover:text-emeraldGlow-400 font-medium">How to Join</a>
+            <button onclick="copyToClipboard('unstable.vinschool-smp.me'); toggleMobileMenu();" 
+                    class="w-full flex items-center justify-center gap-2 bg-emeraldGlow-500/20 text-emeraldGlow-400 border border-emeraldGlow-500/40 py-2.5 rounded-xl text-xs font-pixel">
+                <i class="fa-solid fa-copy"></i>
+                <span>Copy Server IP</span>
+            </button>
+        </div>
+    </header>
+
+    <!-- Hero Section -->
+    <section id="about" class="relative pt-12 pb-20 md:pt-20 md:pb-32 overflow-hidden z-10">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 text-center">
+            <div class="inline-flex items-center gap-2.5 px-4 py-2 rounded-full glass-panel border border-emeraldGlow-500/30 text-xs font-medium mb-6">
+                <span class="flex h-2.5 w-2.5 relative">
+                    <span id="hero-status-ping" class="animate-ping absolute inline-flex h-full w-full rounded-full bg-emerald-400 opacity-75"></span>
+                    <span id="hero-status-dot" class="relative inline-flex rounded-full h-2.5 w-2.5 bg-emerald-500"></span>
+                </span>
+                <span class="text-slate-300">Server Status:</span>
+                <span id="hero-online-count" class="text-emeraldGlow-400 font-bold">Checking status...</span>
+            </div>
+
+            <!-- Server Logo Emblem Display -->
+            <div class="mb-6 flex justify-center">
+                <div class="relative group">
+                    <div class="absolute -inset-2 bg-gradient-to-r from-emeraldGlow-500 via-cyanSilver-400 to-enderPurple-500 rounded-3xl blur-xl opacity-40 group-hover:opacity-75 transition duration-500"></div>
+                    <img src="assets/brand.png" alt="Vinschool Unstable SMP Emblem" class="relative w-36 h-36 sm:w-44 sm:h-44 object-contain filter drop-shadow-[0_0_25px_rgba(16,185,129,0.4)] transition-transform duration-300 group-hover:scale-105">
+                </div>
+            </div>
+
+            <!-- Main Title & Tagline -->
+            <h1 class="font-pixel text-3xl sm:text-5xl md:text-6xl font-bold tracking-wide text-white leading-tight max-w-4xl mx-auto mb-6">
+                WELCOME TO <br>
+                <span class="bg-gradient-to-r from-emeraldGlow-400 via-cyanSilver-300 to-enderPurple-400 bg-clip-text text-transparent text-glow-emerald">
+                    UNSTABLE SMP
+                </span>
+            </h1>
+
+            <p class="max-w-2xl mx-auto text-base sm:text-lg text-slate-300 leading-relaxed mb-10">
+                A high-stakes Minecraft survival realm where economy shifts, factions clash, and unpredictable world events define your destiny. Powered by custom mechanics and a thriving community.
+            </p>
+
+            <!-- Interactive Copy IP Box -->
+            <div class="max-w-xl mx-auto glass-card p-3 sm:p-4 rounded-2xl border-emeraldGlow-500/30 shadow-glow-intense mb-10">
+                <div class="flex flex-col sm:flex-row items-stretch sm:items-center justify-between gap-3">
+                    <div class="flex items-center gap-3 px-3 py-2 text-left">
+                        <div class="w-10 h-10 rounded-xl bg-emeraldGlow-500/10 flex items-center justify-center text-emeraldGlow-400 border border-emeraldGlow-500/20">
+                            <i class="fa-solid fa-server text-lg"></i>
+                        </div>
+                        <div>
+                            <span class="text-[10px] uppercase font-bold text-slate-400 tracking-wider block">Server Address</span>
+                            <span id="server-ip-text" class="font-mono text-emeraldGlow-400 font-bold text-sm sm:text-base">unstable.vinschool-smp.me</span>
+                        </div>
+                    </div>
+                    <button onclick="copyToClipboard('unstable.vinschool-smp.me')" 
+                            class="bg-gradient-to-r from-emeraldGlow-500 to-emeraldGlow-600 hover:from-emeraldGlow-400 hover:to-emeraldGlow-500 text-obsidian-950 font-bold px-6 py-3 rounded-xl transition-all shadow-glow-emerald hover:scale-[1.02] active:scale-95 flex items-center justify-center gap-2 font-pixel text-xs">
+                        <i class="fa-solid fa-copy"></i>
+                        <span>Click to Copy</span>
+                    </button>
+                </div>
+            </div>
+
+            <!-- Call to Action Buttons -->
+            <div class="flex flex-wrap items-center justify-center gap-4">
+                <a href="#how-to-join" class="glass-panel hover:bg-white/10 text-white font-semibold px-6 py-3.5 rounded-xl border border-white/20 transition-all flex items-center gap-2 text-sm">
+                    <i class="fa-solid fa-compass text-emeraldGlow-400"></i>
+                    <span>How to Join</span>
+                </a>
+                <a href="#discord" class="bg-enderPurple-600/20 hover:bg-enderPurple-600/30 text-enderPurple-400 border border-enderPurple-500/40 font-semibold px-6 py-3.5 rounded-xl transition-all shadow-glow-purple flex items-center gap-2 text-sm">
+                    <i class="fa-brands fa-discord text-base"></i>
+                    <span>Discord Community</span>
+                </a>
+            </div>
+        </div>
+    </section>
+
+    <section id="status" class="py-12 relative z-10">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+            <div class="text-center mb-10">
+                <h2 class="font-pixel text-xl sm:text-2xl text-white mb-2">SERVER DASHBOARD</h2>
+            </div>
+
+            <div class="glass-card rounded-3xl p-6 sm:p-8 border border-white/10 max-w-3xl mx-auto relative overflow-hidden">
+                <div class="flex items-center justify-between mb-6 pb-4 border-b border-white/10">
+                    <div class="flex items-center gap-3">
+                        <img src="assets/brand.png" alt="Server Logo" class="w-7 h-7 object-contain">
+                        <span class="font-pixel text-xs text-slate-300">SERVER INFORMATIONS</span>
+                    </div>
+                </div>
+
+                <div class="grid grid-cols-1 sm:grid-cols-2 gap-6">
+                    <div class="glass-panel p-5 rounded-2xl border border-emeraldGlow-500/20 text-center flex flex-col justify-center items-center">
+                        <div class="w-12 h-12 rounded-full bg-emeraldGlow-500/10 text-emeraldGlow-400 flex items-center justify-center mb-3">
+                            <i class="fa-solid fa-users text-xl"></i>
+                        </div>
+                        <span id="widget-players" class="font-pixel text-2xl text-white mt-1">500 Players Max</span>
+                    </div>
+
+                    <!-- Version Card -->
+                    <div class="glass-panel p-5 rounded-2xl border border-enderPurple-500/20 text-center flex flex-col justify-center items-center">
+                        <div class="w-12 h-12 rounded-full bg-enderPurple-500/10 text-enderPurple-400 flex items-center justify-center mb-3">
+                            <i class="fa-solid fa-code-branch text-xl"></i>
+                        </div>
+                        <span class="text-xs text-slate-400 uppercase tracking-wider font-semibold">Minecraft Version</span>
+                        <span id="widget-version" class="font-pixel text-xl text-white mt-1">Java 1.21.11 (Fabric)</span>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- How to Join Section -->
+    <section id="how-to-join" class="py-20 relative z-10">
+        <div class="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8">
+            <div class="text-center mb-12">
+                <h2 class="font-pixel text-2xl sm:text-3xl text-white mb-4">HOW TO JOIN</h2>
+                <p class="text-slate-400">Step-by-step instructions to connect to Vinschool Unstable SMP.</p>
+            </div>
+
+            <!-- Tab Buttons -->
+            <div class="flex justify-center mb-8 p-1.5 glass-panel rounded-2xl max-w-md mx-auto">
+                <button id="tab-java-btn" onclick="switchTab('java')" 
+                        class="flex-1 py-3 px-6 rounded-xl font-pixel text-xs transition-all text-emeraldGlow-400 bg-emeraldGlow-500/20 border border-emeraldGlow-500/30">
+                    <i class="fa-brands fa-java text-base mr-2"></i> Java Edition
+
+            <!-- Java Edition Content -->
+            <div id="tab-java-content" class="glass-card p-6 sm:p-8 rounded-3xl border-emeraldGlow-500/30">
+                <div class="space-y-6">
+                    <div class="flex items-start gap-4">
+                        <div class="w-8 h-8 rounded-full bg-emeraldGlow-500/20 text-emeraldGlow-400 flex items-center justify-center font-pixel text-sm shrink-0">1</div>
+                        <div>
+                            <h4 class="font-bold text-white text-base">Launch Minecraft Java</h4>
+                            <p class="text-slate-400 text-sm mt-1">Open your launcher and start Minecraft 1.21.11.</p>
+                        </div>
+                    </div>
+                    <div class="flex items-start gap-4">
+                        <div class="w-8 h-8 rounded-full bg-emeraldGlow-500/20 text-emeraldGlow-400 flex items-center justify-center font-pixel text-sm shrink-0">2</div>
+                        <div>
+                            <h4 class="font-bold text-white text-base">Navigate to Multiplayer</h4>
+                            <p class="text-slate-400 text-sm mt-1">Click on <strong>Multiplayer</strong> -> <strong>Add Server</strong>.</p>
+                        </div>
+                    </div>
+                    <div class="flex items-start gap-4">
+                        <div class="w-8 h-8 rounded-full bg-emeraldGlow-500/20 text-emeraldGlow-400 flex items-center justify-center font-pixel text-sm shrink-0">3</div>
+                        <div>
+                            <h4 class="font-bold text-white text-base">Enter Server Address</h4>
+                            <p class="text-slate-400 text-sm mt-1">Paste the server IP below into the <strong>Server Address</strong> field:</p>
+                            <div class="mt-3 flex items-center gap-2 glass-panel p-2.5 rounded-xl border-white/10">
+                                <code class="text-emeraldGlow-400 font-mono text-sm flex-1">unstable.vinschool-smp.me</code>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Rules Accordion Section -->
+    <section id="rules" class="py-20 relative z-10">
+        <div class="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8">
+            <div class="text-center mb-16">
+                <h2 class="font-pixel text-2xl sm:text-3xl text-white mb-4">SERVER RULES</h2>
+                <p class="text-slate-400">To maintain a fun and fair environment for everyone, please adhere to these core rules.</p>
+            </div>
+
+            <div class="space-y-4">
+                
+                <!-- Rule 1 -->
+                <div class="glass-card rounded-2xl overflow-hidden">
+                    <button onclick="toggleAccordion('rule-1')" class="w-full p-5 text-left font-semibold text-white flex justify-between items-center gap-4 hover:bg-white/5 transition-colors">
+                        <span class="flex items-center gap-3">
+                            <i class="fa-solid fa-shield-cat text-emeraldGlow-400"></i>
+                            1. No Hacking or Unfair Exploits
+                        </span>
+                        <i id="icon-rule-1" class="fa-solid fa-chevron-down text-slate-400 transition-transform"></i>
+                    </button>
+                    <div id="rule-1" class="hidden p-5 pt-0 text-slate-300 text-sm border-t border-white/5 leading-relaxed">
+                        X-Ray, fly hacks, auto-clickers above 15 CPS, and dupe exploits are strictly prohibited. Violators will face immediate ban without warnings.
+                    </div>
+                </div>
+
+                <!-- Rule 2 -->
+                <div class="glass-card rounded-2xl overflow-hidden">
+                    <button onclick="toggleAccordion('rule-2')" class="w-full p-5 text-left font-semibold text-white flex justify-between items-center gap-4 hover:bg-white/5 transition-colors">
+                        <span class="flex items-center gap-3">
+                            <i class="fa-solid fa-comments text-enderPurple-400"></i>
+                            2. Respectful Community Chat
+                        </span>
+                        <i id="icon-rule-2" class="fa-solid fa-chevron-down text-slate-400 transition-transform"></i>
+                    </button>
+                    <div id="rule-2" class="hidden p-5 pt-0 text-slate-300 text-sm border-t border-white/5 leading-relaxed">
+                        Hate speech, toxicity, harassment, and spamming in global chat are not tolerated. Keep competition in-game and friendly.
+                    </div>
+                </div>
+
+                <!-- Rule 3 -->
+                <div class="glass-card rounded-2xl overflow-hidden">
+                    <button onclick="toggleAccordion('rule-3')" class="w-full p-5 text-left font-semibold text-white flex justify-between items-center gap-4 hover:bg-white/5 transition-colors">
+                        <span class="flex items-center gap-3">
+                            <i class="fa-solid fa-land-mine-on text-emeraldGlow-400"></i>
+                            3. Claimed Land Griefing Rules
+                        </span>
+                        <i id="icon-rule-3" class="fa-solid fa-chevron-down text-slate-400 transition-transform"></i>
+                    </button>
+                    <div id="rule-3" class="hidden p-5 pt-0 text-slate-300 text-sm border-t border-white/5 leading-relaxed">
+                        Unclaimed builds are vulnerable in the wilderness, but using glitch mechanics to bypass land claims is bannable.
+                    </div>
+                </div>
+
+                <!-- Rule 4 -->
+                <div class="glass-card rounded-2xl overflow-hidden">
+                    <button onclick="toggleAccordion('rule-4')" class="w-full p-5 text-left font-semibold text-white flex justify-between items-center gap-4 hover:bg-white/5 transition-colors">
+                        <span class="flex items-center gap-3">
+                            <i class="fa-solid fa-scale-balanced text-enderPurple-400"></i>
+                            4. Fair Trading Practices
+                        </span>
+                        <i id="icon-rule-4" class="fa-solid fa-chevron-down text-slate-400 transition-transform"></i>
+                    </button>
+                    <div id="rule-4" class="hidden p-5 pt-0 text-slate-300 text-sm border-t border-white/5 leading-relaxed">
+                        Scamming real-world currency or out-of-game assets is strictly forbidden. In-game trade agreements must be honored.
+                    </div>
+                </div>
+
+            </div>
+        </div>
+    </section>
+
+    <!-- Discord Promo Section -->
+    <section id="discord" class="py-16 relative z-10">
+        <div class="max-w-5xl mx-auto px-4 sm:px-6 lg:px-8">
+            <div class="glass-card rounded-3xl p-8 sm:p-12 relative overflow-hidden border border-enderPurple-500/40 shadow-glow-purple text-center sm:text-left flex flex-col sm:flex-row items-center justify-between gap-8">
+                
+                <div class="space-y-4 max-w-xl">
+                    <div class="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-enderPurple-500/20 text-enderPurple-400 text-xs font-pixel">
+                        <i class="fa-brands fa-discord"></i> Community Hub
+                    </div>
+                    <h3 class="font-pixel text-2xl sm:text-3xl text-white">JOIN OUR DISCORD</h3>
+                    <p class="text-slate-300 text-sm sm:text-base leading-relaxed">
+                        Stay updated on world events, report issues, trade in market channels, and connect with fellow Unstable SMP players!
+                    </p>
+                </div>
+
+                <a href="https://discord.gg" target="_blank" rel="noopener" 
+                   class="bg-enderPurple-600 hover:bg-enderPurple-500 text-white font-pixel text-xs px-8 py-4 rounded-2xl transition-all shadow-glow-purple hover:scale-105 active:scale-95 shrink-0 flex items-center gap-3">
+                    <i class="fa-brands fa-discord text-lg"></i>
+                    <span>Connect Discord</span>
+                </a>
+
+            </div>
+        </div>
+    </section>
+
+    <!-- Footer -->
+    <footer class="glass-panel border-t border-white/10 py-12 relative z-10 mt-20">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 text-center sm:text-left">
+            <div class="flex flex-col sm:flex-row items-center justify-between gap-6">
+                <div class="flex items-center gap-3 justify-center sm:justify-start">
+                    <img src="assets/brand.png" alt="Vinschool Unstable SMP Logo" class="w-9 h-9 object-contain drop-shadow-[0_0_6px_rgba(16,185,129,0.4)]">
+                    <div class="text-left">
+                        <span class="font-pixel text-sm text-white block">VINSCHOOL UNSTABLE SMP</span>
+                        <p class="text-xs text-slate-500 mt-0.5">Not affiliated with Mojang Studios or Microsoft.</p>
+                    </div>
+                </div>
+
+                <div class="flex items-center gap-6 text-sm text-slate-400">
+                    <a href="#about" class="hover:text-emeraldGlow-400 transition-colors">Home</a>
+                    <a href="#features" class="hover:text-emeraldGlow-400 transition-colors">Features</a>
+                    <a href="#rules" class="hover:text-emeraldGlow-400 transition-colors">Rules</a>
+                    <a href="#discord" class="hover:text-emeraldGlow-400 transition-colors">Discord</a>
+                </div>
+            </div>
+            <div class="mt-8 pt-6 border-t border-white/5 text-center text-xs text-slate-600">
+                &copy; 2026 Vinschool Unstable SMP. All rights reserved.
+            </div>
+        </div>
+    </footer>
+
+    <!-- Toast Notification Container -->
+    <div id="toast-container" class="fixed bottom-6 right-6 z-50 flex flex-col gap-3 pointer-events-none"></div>
+
+    <!-- Lightbox Modal -->
+    <div id="lightbox" class="fixed inset-0 z-50 hidden bg-obsidian-950/90 backdrop-blur-md flex items-center justify-center p-4" onclick="closeLightbox()">
+        <div class="relative max-w-4xl w-full max-h-[90vh] glass-panel rounded-2xl overflow-hidden p-2" onclick="event.stopPropagation()">
+            <button onclick="closeLightbox()" class="absolute top-4 right-4 z-10 w-10 h-10 rounded-full bg-obsidian-900/80 text-white flex items-center justify-center hover:bg-emeraldGlow-500 hover:text-obsidian-950 transition-colors">
+                <i class="fa-solid fa-xmark text-lg"></i>
+            </button>
+            <img id="lightbox-img" src="" alt="Preview" class="w-full h-auto max-h-[80vh] object-contain rounded-xl">
+            <p id="lightbox-caption" class="font-pixel text-xs text-center text-emeraldGlow-400 py-3"></p>
+        </div>
+    </div>
+
+    <!-- JavaScript Engine -->
+    <script>
+        // Canvas Floating Particles Background Effect
+        const canvas = document.getElementById('bg-canvas');
+        const ctx = canvas.getContext('2d');
+        let particles = [];
+
+        function resizeCanvas() {
+            canvas.width = window.innerWidth;
+            canvas.height = window.innerHeight;
+        }
+        window.addEventListener('resize', resizeCanvas);
+        resizeCanvas();
+
+        class Particle {
+            constructor() {
+                this.reset();
+            }
+            reset() {
+                this.x = Math.random() * canvas.width;
+                this.y = Math.random() * canvas.height;
+                this.size = Math.random() * 2.5 + 0.5;
+                this.speedY = -(Math.random() * 0.8 + 0.2);
+                this.speedX = (Math.random() - 0.5) * 0.4;
+                this.color = Math.random() > 0.5 ? 'rgba(16, 185, 129, ' : 'rgba(168, 85, 247, ';
+                this.alpha = Math.random() * 0.6 + 0.2;
+            }
+            update() {
+                this.y += this.speedY;
+                this.x += this.speedX;
+                if (this.y < 0 || this.x < 0 || this.x > canvas.width) {
+                    this.y = canvas.height + 10;
+                    this.x = Math.random() * canvas.width;
+                }
+            }
+            draw() {
+                ctx.fillStyle = this.color + this.alpha + ')';
+                ctx.beginPath();
+                ctx.arc(this.x, this.y, this.size, 0, Math.PI * 2);
+                ctx.fill();
+            }
+        }
+
+        for (let i = 0; i < 60; i++) {
+            particles.push(new Particle());
+        }
+
+        function animateParticles() {
+            ctx.clearRect(0, 0, canvas.width, canvas.height);
+            particles.forEach(p => {
+                p.update();
+                p.draw();
+            });
+            requestAnimationFrame(animateParticles);
+        }
+        animateParticles();
+
+        // Synthesized Audio Feedback for Clicks / Copying
+        function playCopySound() {
+            try {
+                const AudioContext = window.AudioContext || window.webkitAudioContext;
+                if (!AudioContext) return;
+                const audioCtx = new AudioContext();
+                const osc = audioCtx.createOscillator();
+                const gain = audioCtx.createGain();
+
+                osc.type = 'sine';
+                osc.frequency.setValueAtTime(523.25, audioCtx.currentTime); // C5
+                osc.frequency.exponentialRampToValueAtTime(1046.50, audioCtx.currentTime + 0.12); // C6
+
+                gain.gain.setValueAtTime(0.15, audioCtx.currentTime);
+                gain.gain.exponentialRampToValueAtTime(0.01, audioCtx.currentTime + 0.12);
+
+                osc.connect(gain);
+                gain.connect(audioCtx.destination);
+
+                osc.start();
+                osc.stop(audioCtx.currentTime + 0.12);
+            } catch (e) {
+                // Audio context suppressed or unsupported
+            }
+        }
+
+        // Robust Copy to Clipboard with Toast Notification
+        function copyToClipboard(text) {
+            if (navigator.clipboard && window.isSecureContext) {
+                navigator.clipboard.writeText(text).then(() => {
+                    showToast(`Copied "${text}" to clipboard!`);
+                }).catch(() => fallbackCopy(text));
+            } else {
+                fallbackCopy(text);
+            }
+            playCopySound();
+        }
+
+        function fallbackCopy(text) {
+            const textArea = document.createElement("textarea");
+            textArea.value = text;
+            textArea.style.position = "fixed";
+            textArea.style.left = "-999999px";
+            document.body.appendChild(textArea);
+            textArea.focus();
+            textArea.select();
+            try {
+                document.execCommand('copy');
+                showToast(`Copied "${text}" to clipboard!`);
+            } catch (err) {
+                showToast(`Failed to copy automatically.`);
+            }
+            document.body.removeChild(textArea);
+        }
+
+        // Custom Toast System
+        function showToast(message) {
+            const container = document.getElementById('toast-container');
+            const toast = document.createElement('div');
+            toast.className = 'glass-panel border-emeraldGlow-500/50 text-white text-xs font-pixel px-4 py-3 rounded-xl shadow-glow-emerald flex items-center gap-2 pointer-events-auto transition-all transform translate-y-4 opacity-0';
+            toast.innerHTML = `<i class="fa-solid fa-circle-check text-emeraldGlow-400"></i> ${message}`;
+            
+            container.appendChild(toast);
+
+            setTimeout(() => {
+                toast.classList.remove('translate-y-4', 'opacity-0');
+            }, 10);
+
+            setTimeout(() => {
+                toast.classList.add('opacity-0', 'translate-y-2');
+                setTimeout(() => toast.remove(), 300);
+            }, 3000);
+        }
+
+        // Fetch Live Server Status
+        async function fetchServerStatus() {
+            const refreshIcon = document.getElementById('refresh-icon');
+            if (refreshIcon) refreshIcon.classList.add('fa-spin');
+
+            const serverIP = 'unstable.vinschool-smp.me';
+            
+            try {
+                const response = await fetch(`https://api.mcsrvstat.us/3/${serverIP}`);
+                const data = await response.json();
+
+                if (data.online) {
+                    const onlineCount = `${data.players.online} / ${data.players.max}`;
+                    document.getElementById('hero-online-count').innerText = `${data.players.online} Online`;
+                    document.getElementById('widget-players').innerText = onlineCount;
+                    document.getElementById('widget-version').innerText = data.version || 'Java 1.20+';
+                } else {
+                    setOfflineState();
+                }
+            } catch (err) {
+                setOfflineState();
+            } finally {
+                if (refreshIcon) refreshIcon.classList.remove('fa-spin');
+            }
+        }
+
+        function setOfflineState() {
+            document.getElementById('hero-online-count').innerText = 'Online Ready';
+            document.getElementById('widget-players').innerText = '500 Players Max';
+            document.getElementById('widget-version').innerText = 'Java 1.21.11 (Fabric)';
+        }
+
+        // Tab Switcher
+        function switchTab(tab) {
+            const javaBtn = document.getElementById('tab-java-btn');
+            const bedrockBtn = document.getElementById('tab-bedrock-btn');
+            const javaContent = document.getElementById('tab-java-content');
+            const bedrockContent = document.getElementById('tab-bedrock-content');
+
+            if (tab === 'java') {
+                javaBtn.className = "flex-1 py-3 px-6 rounded-xl font-pixel text-xs transition-all text-emeraldGlow-400 bg-emeraldGlow-500/20 border border-emeraldGlow-500/30";
+                bedrockBtn.className = "flex-1 py-3 px-6 rounded-xl font-pixel text-xs transition-all text-slate-400 hover:text-white";
+                javaContent.classList.remove('hidden');
+                bedrockContent.classList.add('hidden');
+            } else {
+                bedrockBtn.className = "flex-1 py-3 px-6 rounded-xl font-pixel text-xs transition-all text-enderPurple-400 bg-enderPurple-500/20 border border-enderPurple-500/30";
+                javaBtn.className = "flex-1 py-3 px-6 rounded-xl font-pixel text-xs transition-all text-slate-400 hover:text-white";
+                bedrockContent.classList.remove('hidden');
+                javaContent.classList.add('hidden');
+            }
+        }
+
+        // Accordion Toggle
+        function toggleAccordion(id) {
+            const content = document.getElementById(id);
+            const icon = document.getElementById(`icon-${id}`);
+            if (content.classList.contains('hidden')) {
+                content.classList.remove('hidden');
+                icon.classList.add('rotate-180');
+            } else {
+                content.classList.add('hidden');
+                icon.classList.remove('rotate-180');
+            }
+        }
+
+        // Mobile Menu Drawer
+        function toggleMobileMenu() {
+            const menu = document.getElementById('mobile-menu');
+            menu.classList.toggle('hidden');
+        }
+
+        // Lightbox Handler
+        function openLightbox(imgSrc, caption) {
+            document.getElementById('lightbox-img').src = imgSrc;
+            document.getElementById('lightbox-caption').innerText = caption;
+            document.getElementById('lightbox').classList.remove('hidden');
+        }
+
+        function closeLightbox() {
+            document.getElementById('lightbox').classList.add('hidden');
+        }
+
+        // Initialize App State
+        window.addEventListener('DOMContentLoaded', () => {
+            fetchServerStatus();
+        });
+    </script>
+</body>
+</html>
